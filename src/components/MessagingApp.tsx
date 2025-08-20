@@ -1,9 +1,12 @@
 import { useState } from "react";
 import ChatList from "./ChatList";
 import ChatHeader from "./ChatHeader";
-import MessageBubble from "./MessageBubble";
+import EnhancedMessageBubble from "./EnhancedMessageBubble";
 import MessageInput from "./MessageInput";
+import SettingsPanel from "./SettingsPanel";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 interface Message {
   id: string;
@@ -19,6 +22,15 @@ interface Message {
   sender?: {
     name: string;
     avatar: string;
+  };
+  edited?: boolean;
+  editHistory?: string[];
+  isOneTime?: boolean;
+  selfDestruct?: number;
+  isPinned?: boolean;
+  replyTo?: {
+    content: string;
+    sender: string;
   };
 }
 
@@ -104,6 +116,7 @@ const mockChats: { [key: string]: Chat } = {
 export default function MessagingApp() {
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const [chats, setChats] = useState(mockChats);
+  const [showSettings, setShowSettings] = useState(false);
 
   const selectedChat = chats[selectedChatId];
 
@@ -153,13 +166,46 @@ export default function MessagingApp() {
     }, 2000);
   };
 
+  const handleEditMessage = (messageId: string) => {
+    console.log('Edit message:', messageId);
+    // TODO: Implement message editing
+  };
+
+  const handleDeleteMessage = (messageId: string) => {
+    console.log('Delete message:', messageId);
+    // TODO: Implement message deletion
+  };
+
+  const handleReplyToMessage = (message: Message) => {
+    console.log('Reply to message:', message);
+    // TODO: Implement message reply
+  };
+
+  const handlePinMessage = (messageId: string) => {
+    console.log('Pin message:', messageId);
+    // TODO: Implement message pinning
+  };
+
   return (
-    <div className="h-screen flex bg-background">
+    <div className="h-screen flex bg-background relative">
+      {/* Settings Panel */}
+      <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
+      
       {/* Chat List Sidebar */}
-      <ChatList 
-        selectedChatId={selectedChatId}
-        onChatSelect={setSelectedChatId}
-      />
+      <div className="relative">
+        <ChatList 
+          selectedChatId={selectedChatId}
+          onChatSelect={setSelectedChatId}
+        />
+        <Button
+          onClick={() => setShowSettings(true)}
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-4 right-4 shadow-glow"
+        >
+          <Settings className="h-5 w-5" />
+        </Button>
+      </div>
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
@@ -172,6 +218,9 @@ export default function MessagingApp() {
               isOnline={selectedChat.isOnline}
               isGroup={selectedChat.isGroup}
               memberCount={selectedChat.memberCount}
+              isEncrypted={true}
+              isStealthMode={false}
+              hasActiveEvent={selectedChat.isGroup}
             />
 
             {/* Messages Area */}
@@ -182,10 +231,14 @@ export default function MessagingApp() {
                     (index === 0 || selectedChat.messages[index - 1].sender?.name !== message.sender?.name);
                   
                   return (
-                    <MessageBubble
+                    <EnhancedMessageBubble
                       key={message.id}
                       message={message}
                       showAvatar={showAvatar}
+                      onEdit={handleEditMessage}
+                      onDelete={handleDeleteMessage}
+                      onReply={handleReplyToMessage}
+                      onPin={handlePinMessage}
                     />
                   );
                 })}
@@ -198,8 +251,11 @@ export default function MessagingApp() {
         ) : (
           <div className="flex-1 flex items-center justify-center bg-chat-background">
             <div className="text-center text-muted-foreground">
-              <h2 className="text-2xl font-semibold mb-2">Welcome to WhatsApp</h2>
-              <p>Select a chat to start messaging</p>
+              <h2 className="text-3xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+                Welcome to YOLOChat
+              </h2>
+              <p className="text-lg mb-4">The Future of Messaging</p>
+              <p className="text-sm opacity-75">Select a chat to start your enhanced messaging experience</p>
             </div>
           </div>
         )}

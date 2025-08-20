@@ -72,7 +72,12 @@ export default function ChatList({ selectedChatId, onChatSelect }: ChatListProps
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-semibold">Chats</h1>
+          <div>
+            <h1 className="text-xl font-semibold bg-gradient-primary bg-clip-text text-transparent">
+              YOLOChat
+            </h1>
+            <p className="text-xs text-muted-foreground">The future of messaging</p>
+          </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="icon">
               <Phone className="h-5 w-5" />

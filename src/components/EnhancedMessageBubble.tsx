@@ -28,7 +28,7 @@ interface Message {
   timestamp: string;
   sent: boolean;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
-  type?: 'text' | 'image' | 'audio' | 'document';
+  type?: 'text' | 'image' | 'audio' | 'document' | 'poll' | 'event';
   mediaUrl?: string;
   fileName?: string;
   fileSize?: string;

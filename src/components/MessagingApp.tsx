@@ -5,9 +5,12 @@ import EnhancedMessageBubble from "./EnhancedMessageBubble";
 import MessageInput from "./MessageInput";
 import SettingsPanel from "./SettingsPanel";
 import StickyNotes from "./StickyNotes";
+import GroupAdminPanel from "./GroupAdminPanel";
+import PollMessage from "./PollMessage";
+import EventMessage from "./EventMessage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Settings, StickyNote } from "lucide-react";
+import { Settings, StickyNote, Shield } from "lucide-react";
 
 interface Message {
   id: string;
@@ -15,7 +18,7 @@ interface Message {
   timestamp: string;
   sent: boolean;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
-  type?: 'text' | 'image' | 'audio' | 'document';
+  type?: 'text' | 'image' | 'audio' | 'document' | 'poll' | 'event';
   mediaUrl?: string;
   fileName?: string;
   fileSize?: string;
@@ -33,6 +36,8 @@ interface Message {
     content: string;
     sender: string;
   };
+  pollData?: any;
+  eventData?: any;
 }
 
 interface Chat {
@@ -119,10 +124,11 @@ export default function MessagingApp() {
   const [chats, setChats] = useState(mockChats);
   const [showSettings, setShowSettings] = useState(false);
   const [showStickyNotes, setShowStickyNotes] = useState(false);
+  const [showGroupAdmin, setShowGroupAdmin] = useState(false);
 
   const selectedChat = chats[selectedChatId];
 
-  const handleSendMessage = (content: string, type: string = 'text') => {
+  const handleSendMessage = (content: string, type: string = 'text', extraData?: any) => {
     if (!selectedChat || !content.trim()) return;
 
     const newMessage: Message = {
@@ -131,7 +137,9 @@ export default function MessagingApp() {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       sent: true,
       status: 'sending',
-      type: type as any
+      type: type as any,
+      ...(type === 'poll' && { pollData: extraData }),
+      ...(type === 'event' && { eventData: extraData })
     };
 
     setChats(prev => ({
@@ -196,6 +204,16 @@ export default function MessagingApp() {
       {/* Sticky Notes Panel */}
       <StickyNotes isOpen={showStickyNotes} onClose={() => setShowStickyNotes(false)} />
       
+      {/* Group Admin Panel */}
+      {selectedChat?.isGroup && (
+        <GroupAdminPanel 
+          isOpen={showGroupAdmin} 
+          onClose={() => setShowGroupAdmin(false)}
+          groupName={selectedChat.name}
+          memberCount={selectedChat.memberCount || 0}
+        />
+      )}
+      
       {/* Chat List Sidebar */}
       <div className="relative">
         <ChatList 
@@ -211,6 +229,16 @@ export default function MessagingApp() {
           >
             <StickyNote className="h-5 w-5" />
           </Button>
+          {selectedChat?.isGroup && (
+            <Button
+              onClick={() => setShowGroupAdmin(true)}
+              variant="ghost"
+              size="icon"
+              className="shadow-glow"
+            >
+              <Shield className="h-5 w-5" />
+            </Button>
+          )}
           <Button
             onClick={() => setShowSettings(true)}
             variant="ghost"
@@ -244,6 +272,30 @@ export default function MessagingApp() {
                 {selectedChat.messages.map((message, index) => {
                   const showAvatar = selectedChat.isGroup && !message.sent && 
                     (index === 0 || selectedChat.messages[index - 1].sender?.name !== message.sender?.name);
+                  
+                  // Render special message types
+                  if (message.type === 'poll' && message.pollData) {
+                    return (
+                      <div key={message.id} className="mb-4">
+                        <PollMessage
+                          poll={message.pollData}
+                          userVotes={[]}
+                          onVote={(optionIds) => console.log('Vote:', optionIds)}
+                        />
+                      </div>
+                    );
+                  }
+                  
+                  if (message.type === 'event' && message.eventData) {
+                    return (
+                      <div key={message.id} className="mb-4">
+                        <EventMessage
+                          event={message.eventData}
+                          onRespond={(response) => console.log('Event response:', response)}
+                        />
+                      </div>
+                    );
+                  }
                   
                   return (
                     <EnhancedMessageBubble

@@ -4,9 +4,10 @@ import ChatHeader from "./ChatHeader";
 import EnhancedMessageBubble from "./EnhancedMessageBubble";
 import MessageInput from "./MessageInput";
 import SettingsPanel from "./SettingsPanel";
+import StickyNotes from "./StickyNotes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, StickyNote } from "lucide-react";
 
 interface Message {
   id: string;
@@ -117,6 +118,7 @@ export default function MessagingApp() {
   const [selectedChatId, setSelectedChatId] = useState<string>("1");
   const [chats, setChats] = useState(mockChats);
   const [showSettings, setShowSettings] = useState(false);
+  const [showStickyNotes, setShowStickyNotes] = useState(false);
 
   const selectedChat = chats[selectedChatId];
 
@@ -191,20 +193,33 @@ export default function MessagingApp() {
       {/* Settings Panel */}
       <SettingsPanel isOpen={showSettings} onClose={() => setShowSettings(false)} />
       
+      {/* Sticky Notes Panel */}
+      <StickyNotes isOpen={showStickyNotes} onClose={() => setShowStickyNotes(false)} />
+      
       {/* Chat List Sidebar */}
       <div className="relative">
         <ChatList 
           selectedChatId={selectedChatId}
           onChatSelect={setSelectedChatId}
         />
-        <Button
-          onClick={() => setShowSettings(true)}
-          variant="ghost"
-          size="icon"
-          className="absolute bottom-4 right-4 shadow-glow"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
+        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+          <Button
+            onClick={() => setShowStickyNotes(true)}
+            variant="ghost"
+            size="icon"
+            className="shadow-glow"
+          >
+            <StickyNote className="h-5 w-5" />
+          </Button>
+          <Button
+            onClick={() => setShowSettings(true)}
+            variant="ghost"
+            size="icon"
+            className="shadow-glow"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Main Chat Area */}
